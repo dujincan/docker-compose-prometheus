@@ -66,14 +66,14 @@ scrape_configs:
 
   
  
-  - job_name: kuaiche_web_status
+  - job_name: web_status
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
-      - targets: ['http://www.kuaiche100.cn']
+      - targets: ['http://www.xxxx.cn']
         labels:
-          instance: kuaiche_web_status
+          instance: xxxxx_web_status
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
