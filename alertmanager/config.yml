@@ -1,7 +1,7 @@
 global:
   smtp_smarthost: 'smtp.exmail.qq.com:465'
-  smtp_from: 'it-monitor@kuaiche100.cn'
-  smtp_auth_username: 'it-monitor@kuaiche100.cn'
+  smtp_from: 'it-monitor@xxx.cn'
+  smtp_auth_username: 'it-monitor@xx.cn'
   smtp_auth_password: 'Dida#1..2017'
   smtp_require_tls: false
 
