@@ -5,7 +5,7 @@ global:
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
   external_labels:
-      monitor: 'docker-host-alpha'
+      monitor: 'prometheus'
 
 # Load and evaluate rules in this file every 'evaluation_interval' seconds.
 rule_files:
@@ -13,16 +13,106 @@ rule_files:
 
 # A scrape configuration containing exactly one endpoint to scrape.
 scrape_configs:
-  - job_name: 'nodeexporter'
+
+  - job_name: 'rabbitmq'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['k8s-rabbitmq:30400']
+  
+  - job_name: 'redis_exporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['aliyun-redis:9121','10.64.4.156:9122']
+
+  - job_name: 'node_exporter'
     scrape_interval: 5s
     static_configs:
       - targets: ['nodeexporter:9100']
+        labels:
+          hostname: 'jumpserver[47.98.46.53]'
+      - targets: ['10.64.4.155:9100']
+        labels:
+          hostname: 'Prod_DockerRose[47.96.133.250]'
+      - targets: ['10.64.4.146:9100']
+        labels:
+          hostname: 'Prod_DockerJack[121.43.167.29]'
+      - targets: ['121.196.197.231:9100']
+        labels:
+          hostname: 'Prod_Dida_Tomcat1[121.196.197.231]'
+      - targets: ['121.43.163.194:9100']
+        labels:
+          hostname: 'Prod_Dida_Tomcat2[121.43.163.194]'
+      - targets: ['116.62.41.156:9100']
+        labels:
+          hostname: 'Prod_YaoJet_dida[116.62.41.156]'
+      - targets: ['116.62.41.153:9100']
+        labels:
+          hostname: 'Prod_YaoJet_nginx[116.62.41.153]'
+      - targets: ['120.27.210.244:9101']
+        labels:
+          hostname: 'Prod_nginx[120.27.210.244]'
+      - targets: ['121.43.184.235:9100']
+        labels:
+          hostname: 'IntService_DockerMother[121.43.184.235]'
+      - targets: ['10.64.4.193:9100']
+        labels:
+          hostname: 'k8snode03[10.64.4.193]'
+      - targets: ['10.64.4.168:9100']
+        labels:
+          hostname: 'k8snode02[10.64.4.168]'
+      - targets: ['10.64.4.167:9100']
+        labels:
+          hostname: 'k8snode01[10.64.4.167]'
+      
 
   - job_name: 'cadvisor'
     scrape_interval: 5s
     static_configs:
       - targets: ['cadvisor:8080']
-
+        labels:
+          hostname: 'jumpserver'
+          ip: '47.98.46.53'
+      - targets: ['Prod_DockerRose:8080']
+        labels:
+          hostname: 'Prod_DockerRose'
+          ip: '47.96.133.250'
+      - targets: ['Prod_DockerJack:8080']
+        labels:
+          hostname: 'Prod_DockerJack'
+          ip: '121.43.167.29'
+      - targets: ['Prod_Dida_Tomcat1:7070']
+        labels:
+          hostname: 'Prod_Dida_Tomcat1'
+          ip: '121.196.197.231'
+      - targets: ['Prod_Dida_Tomcat2:7070']
+        labels:
+          hostname: 'Prod_Dida_Tomcat2'
+          ip: '121.43.163.194'
+      - targets: ['Prod_YaoJet_dida:8080']
+        labels:
+          hostname: 'Prod_YaoJet_dida'
+          ip: '116.62.41.156'
+      - targets: ['Prod_YaoJet_nginx:8080']
+        labels:
+          hostname: 'Prod_YaoJet_nginx'
+          ip: '116.62.41.153'    
+      - targets: ['IntService_DockerMother:8080']
+        labels:
+          hostname: 'IntService_DockerMother'
+          ip: '121.43.184.235'
+      - targets: ['k8snode01:8080']
+        labels:
+           hostname: "k8snode01"
+           ip: '10.64.4.167'
+      - targets: ['k8snode02:8080']
+        labels:
+          hostname: "k8snode02"
+          ip: '10.64.4.168'
+      - targets: ['k8snode03:8080']
+        labels:
+          hostname: "k8snode03"
+          ip: '10.64.4.193'
+      
   - job_name: 'prometheus'
     scrape_interval: 10s
     static_configs:
@@ -34,20 +124,69 @@ scrape_configs:
     static_configs:
       - targets: ['pushgateway:9091']
 
+  - job_name: "Prod_RDS"
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['prod-rds:9104']
+
+  - job_name: "Prod_RDS_RO"
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['prod-rds-rodida:9105']
+  
+  - job_name: mongodb-exproter
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['aliyun-mongodb:9104','mongo-on-dockerjack:9104']
+
+
+  - job_name: "tomcat1-process"
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['121.196.197.231:9256']
+   
+  - job_name: 'check_localServer_port_status'
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+      - targets: ['222.190.106.82:18080']
+        labels:
+          hostname: 'wucheServer'
+      - targets: ['222.190.106.82:1212']
+        labels:
+          hostname: 'yongyouServer'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 10.64.4.156:9115
+ 
+  - job_name: kuaiche_web_status
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets: ['http://www.kuaiche100.cn']
+        labels:
+          instance: kuaiche_web_status
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: 10.64.4.156:9116
 
 alerting:
   alertmanagers:
   - scheme: http
     static_configs:
-    - targets: 
+    - targets:
       - 'alertmanager:9093'
 
-#  - job_name: 'nginx'
-#    scrape_interval: 10s
-#    static_configs:
-#      - targets: ['nginxexporter:9113']
 
 #  - job_name: 'aspnetcore'
-#    scrape_interval: 10s
-#    static_configs:
-#      - targets: ['eventlog-proxy:5000', 'eventlog:5000']
+#  #    scrape_interval: 10s
+#  #    static_configs:
+#  #      - targets: ['eventlog-proxy:5000', 'eventlog:5000']

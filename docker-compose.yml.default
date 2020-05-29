@@ -4,6 +4,9 @@ networks:
   monitor-net:
     driver: bridge
 
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
 
 services:
 
@@ -12,14 +15,13 @@ services:
     container_name: prometheus
     volumes:
       - ./prometheus:/etc/prometheus
-      - ../prometheus_data:/prometheus
+      - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--storage.tsdb.retention.time=200h'
-      - '--web.enable-admin-api'
       - '--web.enable-lifecycle'
     restart: unless-stopped
     expose:
@@ -28,24 +30,7 @@ services:
       - monitor-net
     labels:
       org.label-schema.group: "monitoring"
-    extra_hosts:
-      IntService_DockerMother: 121.43.184.235
-      jumpserver: 10.64.4.156
-      Prod_DockerRose: 10.64.4.155
-      Prod_DockerJack: 10.64.4.146
-      Prod_Dida_Tomcat1: 121.196.197.231
-      Prod_Dida_Tomcat2: 121.43.163.194
-      Prod_YaoJet_dida: 116.62.41.156
-      Prod_YaoJet_nginx: 116.62.41.153
-      prod-rds: 116.62.41.156
-      prod-rds-rodida: 121.43.184.235
-      aliyun-mongodb: 121.43.184.235
-      mongo-on-dockerjack: 10.64.4.146
-      aliyun-redis: 10.64.4.156
-      k8snode01: 10.64.4.167
-      k8snode02: 10.64.4.168
-      k8snode03: 10.64.4.193
-      k8s-rabbitmq: 10.64.4.199
+
   alertmanager:
     image: prom/alertmanager:v0.20.0
     container_name: alertmanager
@@ -83,7 +68,7 @@ services:
       org.label-schema.group: "monitoring"
 
   cadvisor:
-    image: google/cadvisor:latest
+    image: gcr.io/google-containers/cadvisor:v0.34.0
     container_name: cadvisor
     volumes:
       - /:/rootfs:ro
@@ -103,7 +88,7 @@ services:
     image: grafana/grafana:6.6.1
     container_name: grafana
     volumes:
-      - ../grafana_data:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
     environment:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}

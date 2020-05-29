@@ -1,0 +1,1 @@
+DMIN_USER=admin ADMIN_PASSWORD="Dida#1..2017" docker-compose up -d
